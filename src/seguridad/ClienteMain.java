@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ClienteMain {
 
@@ -15,36 +16,33 @@ public class ClienteMain {
 	public static void main(String args[]) throws IOException {
 		
 		Socket sc = null;
-		PrintWriter escritor = null;
-		BufferedReader lector = null;
 		int idCliente = 0;
 		
 		System.out.println("Inicialización cliente ...");
 		
 		try 
 		{
-			System.out.println("Creando conexion con servidor...");
-			sc = new Socket(SERVIDOR, PUERTO);
 			
-			//Crea la comunicacion entre el servidor y el cliente 
-			escritor = new PrintWriter(sc.getOutputStream(), true);
-			lector = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+			Scanner lecturaConsola = new Scanner(System.in);
+			System.out.println("Ingrese numero de clientes a correr:");
+			int numClientes = lecturaConsola.nextInt();
+			lecturaConsola.close();
 			
-			System.out.println("Conexión establecida");
+			for(int i=0; i<numClientes; i++) {
+				System.out.println("Creando conexion con servidor...");
+				sc = new Socket(SERVIDOR, PUERTO);
+				
+				System.out.println("Conexión establecida");
+				
+				//Inicializa el thread de cliente
+				ClienteThread cliente = new ClienteThread(sc, idCliente);
+				cliente.start();
+				idCliente++;
+			}
 			
-			//Crea un flujo para leer lo que escribe el cliente por teclado
-			BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-			
-			//Inicializa el thread de cliente
-			ClienteThread cliente = new ClienteThread(stdIn, lector, escritor, idCliente);
-			cliente.start();
-			idCliente++;
 			
 			
-			stdIn.close();
-			escritor.close();
-			lector.close();
-			sc.close();
+			
 			
 		}
 		catch (IOException e) 
@@ -52,13 +50,3 @@ public class ClienteMain {
 			System.err.println("Exception: " + e.getMessage());
 			System.exit(1);
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-	}
-}
